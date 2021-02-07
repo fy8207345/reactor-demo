@@ -8,7 +8,6 @@ import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -357,5 +356,27 @@ public class FluxTests {
         stringFlux.subscribe(s -> {
             log.info("recv: {}", s);
         });
+
+        Flux<String> stringFlux1 = Flux.just(1, 2, 0)
+                .map(integer -> "100 / " + integer + " = " + (100 / integer))
+                .onErrorResume(throwable -> Mono.just("Divided by zero!"));
+        stringFlux1.subscribe(s -> log.info("recv: {}", s));
+    }
+
+    @Test
+    void onErrorMap() {
+        Flux<String> stringFlux2 = Flux.just(1, 2, 0)
+                .map(integer -> "100 / " + integer + " = " + (100 / integer))
+                .onErrorMap(throwable -> new BusinessException("divided by zero!", throwable));
+        stringFlux2.subscribe(s -> log.info("recv: {}", s),
+                throwable -> log.error("error : ", throwable));
+    }
+
+    @Test
+    void doOnError() {
+        Flux<String> stringFlux2 = Flux.just(1, 2, 0)
+                .map(integer -> "100 / " + integer + " = " + (100 / integer))
+                .doOnError(throwable -> log.error("error : ", throwable));
+        stringFlux2.subscribe(s -> log.info("recv: {}", s));
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -378,5 +379,19 @@ public class FluxTests {
                 .map(integer -> "100 / " + integer + " = " + (100 / integer))
                 .doOnError(throwable -> log.error("error : ", throwable));
         stringFlux2.subscribe(s -> log.info("recv: {}", s));
+    }
+
+    @Test
+    void doFinally() {
+        LongAdder statsCancel = new LongAdder();
+        Flux.just("foo", "bar")
+                .doOnSubscribe(subscription -> {})
+                .doFinally(signalType -> {
+                    if(SignalType.CANCEL.equals(signalType)){
+                        statsCancel.increment();
+                    }
+                })
+                .take(1)
+        .subscribe(s -> log.info("value: {} - {}", s, statsCancel.sum()));
     }
 }

@@ -12,7 +12,7 @@ public class ConcurrentHashMapTests {
     void name() {
 
         ConcurrentHashMap<Integer, Integer> map = new ConcurrentHashMap<>();
-        for(int i=0;i<20;i++){
+        for(int i=0;i<20;i++) {
             map.put(0xff0000+i, i);
         }
     }
